@@ -12,7 +12,7 @@
                     :key="index"
                     @click.prevent="selectAnswer(index)"
                     :class="[selectedIndex === index ? 'selected' : '']"
-                > 
+                > <!--clicking passes index into selectAnswer(index), class runs by default -->
                     {{answer}}
                 </b-list-group-item>
             </b-list-group>
@@ -43,6 +43,7 @@ export default {
     data() {
         return {
             selectedIndex: null,
+            correctIndex: null,
             shuffledAnswers: []
         }
     },
@@ -55,7 +56,8 @@ export default {
     },
     watch: {
         currentQuestion: { 
-            immediate: true, //runs when currentQuestion gets passed as props
+            immediate: true, //runs when currentQuestion first gets passed as props and
+                             //when current question changes from the parent, handler runs
             handler() {
                 this.selectedIndex = null
                 this.shuffleAnswers()
@@ -66,7 +68,7 @@ export default {
         selectAnswer(index) {
             this.selectedIndex = index
         },
-        sumbmitAnswers() {
+        submitAnswer() {
             let isCorrect = false
 
             if (this.selectedIndex === this.correctIndex) {
@@ -78,6 +80,9 @@ export default {
         shuffleAnswers() {
             let answers = [...this.currentQuestion.incorrect_answers, this.currentQuestion.correct_answer]
             this.shuffledAnswers = _.shuffle(answers)
+            this.correctIndex = this.shuffledAnswers.indexOf(this.currentQuestion.correct_answer)
+            //last part of the above gives 'correct_answer' value and passes it to the shuffled answer list
+            // to get index of correct answer 
         }
     }
 }
