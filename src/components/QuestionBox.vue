@@ -8,10 +8,10 @@
             <hr class="my-4">
             <b-list-group>
                 <b-list-group-item
-                    v-for="(answer, index) in answers" 
+                    v-for="(answer, index) in shuffledAnswers" 
                     :key="index"
                     @click.prevent="selectAnswer(index)"
-                    :class="[selectedIndex === index ? 'selected' : '']"
+                    :class=answerClass(index)
                 > <!--clicking passes index into selectAnswer(index), class runs by default -->
                     {{answer}}
                 </b-list-group-item>
@@ -20,6 +20,7 @@
             <b-button 
              variant="primary"
              @click="submitAnswer"
+             :disabled="selectedIndex === null || answered "
             >
              Submit
             </b-button>
@@ -44,7 +45,8 @@ export default {
         return {
             selectedIndex: null,
             correctIndex: null,
-            shuffledAnswers: []
+            shuffledAnswers: [],
+            answered: false
         }
     },
     computed: {
@@ -60,13 +62,14 @@ export default {
                              //when current question changes from the parent, handler runs
             handler() {
                 this.selectedIndex = null
+                this.answered = false
                 this.shuffleAnswers()
             }
         }
     },
     methods: {
         selectAnswer(index) {
-            this.selectedIndex = index
+            this.selectedIndex = index 
         },
         submitAnswer() {
             let isCorrect = false
@@ -76,6 +79,7 @@ export default {
             }
 
             this.increment(isCorrect)
+            this.answered = true
         },
         shuffleAnswers() {
             let answers = [...this.currentQuestion.incorrect_answers, this.currentQuestion.correct_answer]
@@ -83,6 +87,22 @@ export default {
             this.correctIndex = this.shuffledAnswers.indexOf(this.currentQuestion.correct_answer)
             //last part of the above gives 'correct_answer' value and passes it to the shuffled answer list
             // to get index of correct answer 
+        },
+        answerClass(index) {
+            let answerClass = ''
+
+            if (!this.answered && this.selectedIndex === index) {
+                answerClass = 'selected'
+            } else if (this.answered && this.correctIndex === index) {
+                answerClass = 'correct'
+            } else if (this.answered &&
+            this.selectedIndex === index &&
+            this.correctIndex !== index
+            ) {
+                answerClass = 'incorrect'
+            }
+
+            return answerClass
         }
     }
 }
